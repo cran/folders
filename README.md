@@ -21,7 +21,7 @@ you write cleaner, more portable, and more reproducible code.
 
 ## Default Folders
 
-The package defaults provide "code", "data", "doc", "figures" and 
+The package defaults provide "code", "conf", "data", "doc", "figures" and 
 "results" folders. You can specify alternatives in a YAML configuration file, 
 which this package will read and use instead. See "Configuration file" below 
 for more details.
@@ -50,7 +50,7 @@ determined by the *here* package.
 
 If you are neither working in an RStudio project, nor in a folder tracked by a 
 version control system (git or Subversion), nor an R package development 
-folder, then the current working directory at the time the `here` package was 
+folder, then the current working directory at the time the *here* package was 
 loaded will be treated as the "project root" folder. 
 
 Or you can force a folder to be the "project root" with a `.here` file. You 
@@ -61,10 +61,17 @@ you are not using RStudio Projects or version control.
 
 ## Installation
 
+You can install the stable version from *CRAN* with:
+
+
+```r
+install.packages("folders")
+```
+
 You can install the development version from *GitHub* with:
 
 
-```
+```r
 # install.packages("devtools")
 devtools::install_github("deohs/folders")
 ```
@@ -72,7 +79,7 @@ devtools::install_github("deohs/folders")
 Or, if you prefer using *pacman*:
 
 
-```
+```r
 if (!requireNamespace("pacman", quietly = TRUE)) install.packages('pacman')
 pacman::p_load_gh("deohs/folders")
 ```
@@ -83,22 +90,21 @@ The following code chunk can be used at the beginning of your scripts to make
 use of standardized folders in your projects.
 
 
-```
+```r
 # Load packages, installing as needed
 if (!requireNamespace("pacman", quietly = TRUE)) install.packages('pacman')
-pacman::p_load(here)
-pacman::p_load_gh("deohs/folders")
+pacman::p_load(here, folders)
 
 # Get the list of standard folders and create any folders which are missing
-conf <- here::here('folders.yml')
-folders <- get_folders(conf)
+conf_file <- here('conf', 'folders.yml')
+folders <- get_folders(conf_file)
 result <- create_folders(folders)
 ```
 
 Then, later in your scripts, you can refer to folders like this:
 
 
-```
+```r
 dir.exists(here(folders$data))
 ```
 
@@ -109,26 +115,25 @@ dir.exists(here(folders$data))
 Or you can add to the standard folder paths like this: 
 
 
-```
+```r
 file_path <- here(folders$data, "data.csv")
 ```
 
 ## Basic Usage Scenario
 
 Here is an example of a script which will initialize the folders and then write 
-a data file to the `folders$data` folder. You will see that there are no 
-hardcoded paths for files or folders and no use of `setwd()`.
+a data file to the `folders$data` folder. Aside from setting the path to the
+configuration file, there are no hardcoded paths and there is no `setwd()`.
 
 
-```
+```r
 # Load packages, installing as needed
 if (!requireNamespace("pacman", quietly = TRUE)) install.packages('pacman')
-pacman::p_load(here)
-pacman::p_load_gh("deohs/folders")
+pacman::p_load(here, folders)
 
 # Get the list of standard folders and create any folders which are missing
-conf <- here::here('folders.yml')
-folders <- get_folders(conf)
+conf_file <- here('conf', 'folders.yml')
+folders <- get_folders(conf_file)
 result <- create_folders(folders)
 
 # Check to see that the data folder has been created
@@ -139,7 +144,7 @@ dir.exists(here(folders$data))
 ## [1] TRUE
 ```
 
-```
+```r
 # Create a dataset to use for writing a CSV file to the data folder
 df <- data.frame(x = letters[1:3], y = 1:3)
 
@@ -152,7 +157,7 @@ file.exists(file_path)
 ## [1] FALSE
 ```
 
-```
+```r
 # Write the CSV file
 write.csv(df, file_path, row.names = FALSE)
 
@@ -164,9 +169,9 @@ file.exists(file_path)
 ## [1] TRUE
 ```
 
-```
+```r
 # Cleanup unused (empty) folders (Optional, as you may prefer to keep them)
-result <- cleanup_folders(folders, conf)
+result <- cleanup_folders(folders, conf_file)
 
 # Verify that the data folder and CSV file still exist after cleanup
 file.exists(file_path)
@@ -176,9 +181,9 @@ file.exists(file_path)
 ## [1] TRUE
 ```
 
-```
+```r
 # Verify that the configuration file still exists after cleanup
-file.exists(conf)
+file.exists(conf_file)
 ```
 
 ```
@@ -192,9 +197,9 @@ You can refer to subfolders relative to the paths in your `folders` list using
 just refer to that folder with `here(folders$data, "raw")`:
 
 
-```
-conf <- here::here('folders.yml')
-folders <- get_folders(conf)
+```r
+conf_file <- here('conf', 'folders.yml')
+folders <- get_folders(conf_file)
 raw_df <- here(folders$data, "raw", "file.csv")
 ```
 
@@ -204,9 +209,9 @@ we can create a "phase" folder under each folder in `folders` and then a "01"
 folder under each "phase" folder:
 
 
-```
-conf <- here::here('folders.yml')
-folders <- lapply(get_folders(conf), here, "phase", "01")
+```r
+conf_file <- here('conf', 'folders.yml')
+folders <- lapply(get_folders(conf_file), here, "phase", "01")
 res <- create_folders(folders) 
 ```
 
@@ -218,15 +223,17 @@ that project phase using the same variables, e.g., `folders$data`,
 `folders$results`, etc.
 
 
-```
+```r
 df <- read.csv(here(folders$data, "data.csv"))
 ```
 
 ## Configuration file
 
 The configuration file, if not already present, will be written by `get_folders()` 
-to a YAML file called `folders.yml`, stored in the parent folder of your R 
-project. This file will be read by `config::get()` on subsequent executions of 
+to a YAML file with a path and filename that you provide. Usually this would be 
+named something like `folders.yml`, as in the examples above, and usually you will 
+want this file stored in either the parent folder or the "conf" subfolder of your 
+R project. This file will be read by `config::get()` on subsequent executions of 
 `get_folders()`. This behavior can be modified by function parameters.
 
 The default configuration file looks like:
@@ -234,6 +241,7 @@ The default configuration file looks like:
 ```
 default:
   code: code
+  conf: conf
   data: data
   doc: doc
   figures: figures
@@ -246,21 +254,20 @@ maximum consistency between your projects. If you do wish to edit it, you can
 do so with any text editor or with R as shown below.
 
 
-```
+```r
 # Load packages, installing as needed
 if (!requireNamespace("pacman", quietly = TRUE)) install.packages('pacman')
-pacman::p_load(here, yaml)
-pacman::p_load_gh("deohs/folders")
+pacman::p_load(here, yaml, folders)
 
 # Get the list of standard folders, creating the configuration file if missing
-conf <- here::here('folders.yml')
-folders <- get_folders(conf)
+conf_file <- here('conf', 'folders.yml')
+folders <- get_folders(conf_file)
 
 # Replace a default with a custom folder path
 folders$data <- "data_folder"
 
 # Edit the default configuration file to save the modification
-write_yaml(list(default = folders), file = conf)
+write_yaml(list(default = folders), file = conf_file)
 ```
 
 ### Handling platform-dependent paths
@@ -283,9 +290,9 @@ Darwin:
 And then you can read in the appropriate paths for the system you are using:
 
 
-```
-conf <- here::here('folders.yml')
-folders <- get_folders(conf, conf_name = Sys.info()[['sysname']])
+```r
+conf_file <- here('conf', 'folders.yml')
+folders <- get_folders(conf_file, conf_name = Sys.info()[['sysname']])
 data_folder <- folders$data
 ```
 
@@ -301,3 +308,7 @@ for you: [config](https://CRAN.R-project.org/package=config), [here](https://CRA
 
 You will need to load the *here* package with your scripts to make the most use 
 of the *folders* package, as seen in the Basic Usage examples above.
+
+
+
+

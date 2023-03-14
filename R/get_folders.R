@@ -23,26 +23,31 @@
 #' list from a non-default section of the configuration file, set the name of
 #' the section with the "conf_name" parameter.
 #' @examples
-#' conf <- tempfile("folders.yml")
-#' folders <- get_folders(conf)
-#' folders <- get_folders(conf, conf_name = "custom")
+#' conf_file <- tempfile("folders.yml")
+#' folders <- get_folders(conf_file)
+#' folders <- get_folders(conf_file, conf_name = "custom")
 #' Sys.setenv(R_CONFIG_NAME = "custom")
-#' folders <- get_folders(conf)
+#' folders <- get_folders(conf_file)
 #' @export
-get_folders <- function(conf_file, conf_name = Sys.getenv('R_CONFIG_NAME'),
+get_folders <- function(conf_file = NULL, 
+                        conf_name = Sys.getenv('R_CONFIG_NAME'),
                         save_conf = TRUE) {
-  if(file.exists(conf_file)) {
+  if(!is.null(conf_file) && file.exists(conf_file)) {
     conf_name <- ifelse(conf_name == '', 'default', conf_name)
     folders <- config::get(config = conf_name, file = conf_file)
   } else {
     folders <- list(
       code = 'code',
+      conf = 'conf',
       data = 'data',
       doc = 'doc',
       figures = 'figures',
       results = 'results'
     )
-    if (save_conf) yaml::write_yaml(list(default = folders), file = conf_file)
+    if (!is.null(conf_file) && save_conf) {
+      dir.create(dirname(conf_file), recursive = TRUE, showWarnings = FALSE)
+      yaml::write_yaml(list(default = folders), file = conf_file)
+    }
   }
   return(folders)
 }
