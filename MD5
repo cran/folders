@@ -1,0 +1,14 @@
+c00d3c42ec472a714d8cc82c7e147e2e *DESCRIPTION
+00c02686034acff0c62bd4eb9f6d2a77 *LICENSE
+c0133cce578daca840f3e9e21ef62fb1 *NAMESPACE
+49b6450915532131441aec4da03b08c2 *R/cleanup_folders.R
+0775b076b48e07eb9286860f9b5da0e8 *R/create_folders.R
+b6500e52556255f29680818eec34746d *R/get_folders.R
+8e85a5588e60315378aedac774e3296a *README.md
+e08d0531f9db3ca49cdb8c006b600807 *man/cleanup_folders.Rd
+1586934f6432e2af6c79622f9a9b974a *man/create_folders.Rd
+a6357b0de27b4109e700b630d8653c1f *man/get_folders.Rd
+fb4cbb73554829a04b7eaa324d04f467 *tests/testthat.R
+d73fa04885e799de2097b35a0f32f9ce *tests/testthat/test-cleanup_folders.R
+fa290a9ef998a9babd7d9ee592a34969 *tests/testthat/test-create_folders.R
+254621bf08569f66903584f1c61237b3 *tests/testthat/test-get_folders.R
